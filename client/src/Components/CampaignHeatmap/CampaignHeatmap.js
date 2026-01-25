@@ -47,6 +47,10 @@ export default function CampaignHeatmap({
     return styleClass;
   }
 
+  if (!heatmapData || heatmapData.length === 0) {
+    return null;
+  }
+
   return (
     <div className="border rounded-3 shadow-sm p-4">
       <div>

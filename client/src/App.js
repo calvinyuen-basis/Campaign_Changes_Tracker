@@ -51,6 +51,7 @@ export default function App() {
   }
 
   async function handleLoadCampaign(e) {
+    e.preventDefault();
     console.log('Campaign ID from state:', campaignId);
 
     if (!campaignId || isNaN(campaignId)) {
@@ -93,25 +94,27 @@ export default function App() {
         <h2>Campaign Changes Tracker</h2>
 
         <Box className="d-flex gap-2 my-3 align-items-center py-2">
-          <TextField
-            label="Campaign ID"
-            variant="outlined"
-            onChange={(e) => setCampaignId(e.target.value)}
-            size="small"
-            type="number"
-            sx={{
-              '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
-                WebkitAppearance: 'none',
-                margin: 0,
-              },
-              '& input[type=number]': {
-                MozAppearance: 'textfield',
-              },
-            }}
-          />
-          <Button variant="contained" onClick={handleLoadCampaign} disabled={loading} className="me-5">
-            {loading ? 'Loading...' : 'Load Campaign'}
-          </Button>
+          <Box component="form" onSubmit={handleLoadCampaign} sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <TextField
+              label="Campaign ID"
+              variant="outlined"
+              onChange={(e) => setCampaignId(e.target.value)}
+              size="small"
+              type="number"
+              sx={{
+                '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                  WebkitAppearance: 'none',
+                  margin: 0,
+                },
+                '& input[type=number]': {
+                  MozAppearance: 'textfield',
+                },
+              }}
+            />
+            <Button variant="contained" type="submit" disabled={loading} sx={{ mr: 5 }}>
+              {loading ? 'Loading...' : 'Load Campaign'}
+            </Button>
+          </Box>
           {data.length > 0 && (
             <DateRangePicker
               dateRangeStart={dateRangeStart}

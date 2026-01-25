@@ -7,6 +7,7 @@
 
 .react-calendar-heatmap { 
   height: 220px;
+  min-width: 40px;
 }
 .react-calendar-heatmap .color-scale-1 { fill: #d6e685; cursor: pointer; }
 .react-calendar-heatmap .color-scale-2 { fill: #8cc665; cursor: pointer; }
