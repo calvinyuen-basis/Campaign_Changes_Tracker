@@ -6,9 +6,18 @@ export async function getCampaignChanges(campaignId) {
     if (!res.ok) {
       throw new Error(`API request failed with status ${res.status}`);
     }
-
     const data = await res.json();
-    return data;
+    
+    const filteredData = data
+      .map(entry => ({
+        ...entry,
+        changes: entry.changes ? entry.changes.filter(change => 
+          change.fieldName !== 'lastModified' && change.oldValue !== change.newValue
+        ) : []
+      }))
+      .filter(entry => entry.changes && entry.changes.length > 0);
+    
+    return filteredData;
   } catch (err) {
     console.error("Error fetching campaign:", err);
     throw err; 

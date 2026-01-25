@@ -1,0 +1,34 @@
+.campaign-heatmap-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.react-calendar-heatmap { 
+  height: 220px;
+}
+.react-calendar-heatmap .color-scale-1 { fill: #d6e685; cursor: pointer; }
+.react-calendar-heatmap .color-scale-2 { fill: #8cc665; cursor: pointer; }
+.react-calendar-heatmap .color-scale-3 { fill: #44a340; cursor: pointer; }
+.react-calendar-heatmap .color-scale-4 { fill: #1e6823; cursor: pointer; }
+.react-calendar-heatmap .color-bordered { stroke: #ffd700; stroke-width: 2px; }
+
+.weekday-labels-sticky {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 250px;
+  padding-top: 28px;
+  font-size: 10px;
+  color: #aaa;
+  background: white;
+  width: 30px;
+  margin-right: 10px;
+  font-size: 10px;
+}
+
+.weekday-labels-sticky div {
+  font-size: 20px;
+}

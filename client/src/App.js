@@ -2,22 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { getCampaignChanges } from "./api";
-import CalendarHeatmap from 'react-calendar-heatmap';
-import 'react-calendar-heatmap/dist/styles.css';
-import Tooltip from './Components/Tooltip';
 import DisplayContainer from './Components/DisplayContainer';
+import CampaignHeatmap from './Components/CampaignHeatmap/CampaignHeatmap';
+import DateRangePicker from './Components/DateRangePicker';
+import { TextField, Button, Box } from '@mui/material';
 import './App.css';
 
-function parseData(result) {
-  return result
-    .map(entry => ({
-      ...entry,
-      changes: entry.changes ? entry.changes.filter(change => change.fieldName !== 'lastModified') : []
-    }))
-    .filter(entry => entry.changes && entry.changes.length > 0);
-}
-
 function getChangesByDate(data) {
+  if (data.length === 0) return [];
+  
   const counts = {};
   data.forEach(entry => {
     const date = new Date(entry.committed).toISOString().split("T")[0];
@@ -30,102 +23,118 @@ function getChangesByDate(data) {
   return Object.entries(counts).map(([date, count]) => ({ date, count }));
 }
 
-function getGutterStyle(entry, creationDate) {
-  const baseClass = !entry ? 'color-empty' :
-                    entry.count < 2 ? 'color-scale-1' :
-                    entry.count < 4 ? 'color-scale-2' :
-                    entry.count < 6 ? 'color-scale-3' : 'color-scale-4';
-  
-  if (creationDate && entry && entry.date) {
-    const creationDateStr = new Date(creationDate).toISOString().split('T')[0];
-    if (entry.date === creationDateStr) {
-      return `${baseClass} color-bordered`;
-    }
-  }
-  return baseClass;
-}
-
-function getMessage(entry) {
-  if (entry && entry.count > 0) {
-    return `${entry.count} change${entry.count !== 1 ? 's' : ''} on ${entry.date}`;
-  }
-  return 'No changes';
-}
-
 export default function App() {
   const [data, setData] = useState([]);
   const [heatmapData, setHeatmapData] = useState([]);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(new Date());
+  const [firstDate, setFirstDate] = useState(null);
+  const [lastDate, setLastDate] = useState(new Date());
 
-  const [creationDate, setCreationDate] = useState(null);
+  const [campaignCreationDate, setCampaignCreationDate] = useState(null);
 
   const [error, setError] = useState(null);
   const [changesOnSelectedDate, setChangesOnSelectedDate] = useState([]);
+  const [campaignId, setCampaignId] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [dateRangeStart, setDateRangeStart] = useState(null);
+  const [dateRangeEnd, setDateRangeEnd] = useState(null);
 
   function getChangesOnSelectedDate(selectedDate) {
-    const res = data.filter(entry => {
-      const entryDate = new Date(entry.committed).toISOString().split("T")[0];
-      return entryDate === selectedDate;
-    });
+    if (!selectedDate) {
+      return [];
+    }
     return data.filter(entry => {
-      const entryDate = new Date(entry.committed).toISOString().split("T")[0];
-      return entryDate === selectedDate;
+      if (entry) {
+        const entryDate = new Date(entry.committed).toISOString().split("T")[0];
+        return entryDate === selectedDate;
+      }
     });
   }
 
-  useEffect(() => {
-    async function loadCampaign() {
-      try {
-        const result = await getCampaignChanges(2899741);
-        result.reverse();
-        const creationDate = new Date(result[0].committed);
-        setCreationDate(creationDate);
-        setStartDate(creationDate);
-        const parseResult = parseData(result);
-        setData(parseResult);
-        setHeatmapData(getChangesByDate(parseResult));
-      } catch (err) {
-        setError(err.message);
-      }
-    }
-    loadCampaign();
-  }, []);
+  async function handleLoadCampaign(e) {
+    console.log('Campaign ID from state:', campaignId);
 
-  if (error) return <p>Error: {error}</p>;
-  if (!data) return <p>Loading...</p>;
+    if (!campaignId || isNaN(campaignId)) {
+      setError('Please enter a valid campaign ID');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setChangesOnSelectedDate([]);
+
+    try {
+      const result = await getCampaignChanges(Number(campaignId));
+      const campaignCreationDate = new Date(result[result.length - 1].committed);
+      const dateWithLastChange = new Date(result[0].committed);
+      const today = new Date();
+      console.log(result)
+      
+      setData(result);
+      setHeatmapData(getChangesByDate(result));
+      console.log(getChangesByDate(result));
+
+      // Preserve the date of campiagn's creation as an indication for CalendarHeatmap
+      setCampaignCreationDate(campaignCreationDate);
+      // Get the first and last date of all campaign's changes to limit date pickers
+      setFirstDate(campaignCreationDate);
+      setLastDate(dateWithLastChange < today ? dateWithLastChange : today);
+      // the min and max date for date pickers
+      setDateRangeStart(campaignCreationDate);
+      setDateRangeEnd(dateWithLastChange < today ? dateWithLastChange : today);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <div style={{ padding: '40px', margin: '0 auto' }}>
-      <h1>Campaign Changes Tracker</h1>
-      {creationDate && <p>First change: {startDate.toLocaleDateString()}</p>}
+      <div className="p-5 mx-auto">
+        <h2>Campaign Changes Tracker</h2>
+
+        <Box className="d-flex gap-2 my-3 align-items-center py-2">
+          <TextField
+            label="Campaign ID"
+            variant="outlined"
+            onChange={(e) => setCampaignId(e.target.value)}
+            size="small"
+            type="number"
+            sx={{
+              '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+              '& input[type=number]': {
+                MozAppearance: 'textfield',
+              },
+            }}
+          />
+          <Button variant="contained" onClick={handleLoadCampaign} disabled={loading} className="me-5">
+            {loading ? 'Loading...' : 'Load Campaign'}
+          </Button>
+          {data.length > 0 && (
+            <DateRangePicker
+              dateRangeStart={dateRangeStart}
+              dateRangeEnd={dateRangeEnd}
+              setDateRangeStart={setDateRangeStart}
+              setDateRangeEnd={setDateRangeEnd}
+              firstDate={firstDate}
+              lastDate={lastDate}
+            />
+          )}
+        </Box>
       
-      <div style={{
-        overflowY: 'hidden',
-      }}>
-        <CalendarHeatmap
-          startDate={startDate}
-          endDate={endDate}
-          values={heatmapData}
-          classForValue={(entry) => getGutterStyle(entry, creationDate)}
-          onClick={(item) => {
-            if (item && item.date && item.count) {
-              setChangesOnSelectedDate(getChangesOnSelectedDate(item.date));
-            }
-          }}
-          tooltipDataAttrs={(item) => ({
-            'data-tooltip-id': 'data-tooltip',
-            'data-tooltip-content': getMessage(item),
-          })}
-          showOutOfRangeDays
-          showWeekdayLabels
-        />
-      </div>
-      <Tooltip />
+      <CampaignHeatmap
+        heatmapData={heatmapData}
+        dateRangeStart={dateRangeStart}
+        dateRangeEnd={dateRangeEnd}
+        campaignCreationDate={campaignCreationDate}
+        onDateClick={(date) => setChangesOnSelectedDate(getChangesOnSelectedDate(date))}
+      />
 
       {changesOnSelectedDate.length > 0 && (
         <DisplayContainer changes={changesOnSelectedDate}/>
       )}
-    </div>
+      </div>
   );
 }

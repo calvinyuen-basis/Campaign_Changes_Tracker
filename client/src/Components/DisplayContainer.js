@@ -6,11 +6,12 @@ export default function DisplayContainer({ changes }) {
   }
 
   return (
-    <div className="changes-container">
+    <div>
       {changes.map((entry, index) => (
         <ChangeDisplay 
           key={entry.id || index}
           entry={entry}
+          onClick={console.log(entry)}
         />
       ))}
     </div>
