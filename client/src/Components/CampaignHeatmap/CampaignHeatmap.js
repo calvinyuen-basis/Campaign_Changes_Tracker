@@ -1,50 +1,50 @@
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import './CampaignHeatmap.css';
-import Tooltip from './Tooltip';
-
-function getMessage(entry) {
-  if (entry && entry.count > 0) {
-    return `${entry.count} change${entry.count !== 1 ? 's' : ''} on ${entry.date}`;
-  }
-  return 'No changes';
-}
+import { Tooltip } from 'react-tooltip';
+import { formatDateString, isInDateRange } from '../../utils/dateUtils';
 
 export default function CampaignHeatmap({ 
   heatmapData, 
   dateRangeStart, 
   dateRangeEnd, 
-  creationDate, 
+  campaignCreationDate, 
   onDateClick
 }) {
-  function isInDateRange(itemDate) {
-    if (!dateRangeStart && !dateRangeEnd) return true;
-    const startDateStr = dateRangeStart ? new Date(dateRangeStart).toISOString().split('T')[0] : null;
-    const endDateStr = dateRangeEnd ? new Date(dateRangeEnd).toISOString().split('T')[0] : null;
-    const afterStart = !startDateStr || itemDate >= startDateStr;
-    const beforeEnd = !endDateStr || itemDate <= endDateStr;
-    return afterStart && beforeEnd;
+
+  function getMessage(entry) {
+    if (!isInDateRange(entry.date, dateRangeStart, dateRangeEnd)) return 'No Data (Out of selected date range)';
+    let message = entry.count > 0 ? `${entry.count} change${entry.count !== 1 ? 's' : ''}` : 'No changes';
+    message += ` on ${entry.date}`;
+    if (entry.date === campaignCreationDate) {
+      message += ' (date of creation)';
+    }
+    return message;
   }
 
   function getTotalChangesInRange() {
     return heatmapData
-      .filter(item => isInDateRange(item.date))
+      .filter(item => isInDateRange(item.date, dateRangeStart, dateRangeEnd))
       .reduce((total, item) => total + item.count, 0);
   }
 
+  function getColorClass(entry) {
+    if (!entry || entry.count === 0) return 'color-empty';
+    if (entry.count < 2) return 'color-scale-1';
+    if (entry.count < 4) return 'color-scale-2';
+    if (entry.count < 6) return 'color-scale-3';
+    return 'color-scale-4';
+  }
+
   function getGutterStyle(entry) {
-    const styleClass = !entry ? 'color-empty' :
-                      entry.count < 2 ? 'color-scale-1' :
-                      entry.count < 4 ? 'color-scale-2' :
-                      entry.count < 6 ? 'color-scale-3' : 'color-scale-4';
-    
-    if (creationDate && entry && entry.date) {
-      const creationDateStr = new Date(creationDate).toISOString().split('T')[0];
-      if (entry.date === creationDateStr) {
-        return `${styleClass} color-bordered`;
-      }
+    if (!entry || !isInDateRange(entry.date, dateRangeStart, dateRangeEnd)) {
+      return 'color-out-of-range';
     }
-    return styleClass;
+    
+    const colorClass = getColorClass(entry);
+    const isCreationDate = entry?.date === campaignCreationDate;
+    
+    return isCreationDate ? `${colorClass} color-bordered` : colorClass;
   }
 
   if (!heatmapData || heatmapData.length === 0) {
@@ -54,7 +54,7 @@ export default function CampaignHeatmap({
   return (
     <div className="border rounded-3 shadow-sm p-4">
       <div>
-        {getTotalChangesInRange()} changes between {dateRangeStart ? new Date(dateRangeStart).toISOString().split('T')[0] : ''} and {dateRangeEnd ? new Date(dateRangeEnd).toISOString().split('T')[0] : ''}
+        {getTotalChangesInRange()} changes between {formatDateString(dateRangeStart)} and {formatDateString(dateRangeEnd)}
       </div>
       <hr className="w-100" />
       <div className="campaign-heatmap-container">
@@ -70,7 +70,7 @@ export default function CampaignHeatmap({
         <CalendarHeatmap
           startDate={dateRangeStart}
           endDate={dateRangeEnd}
-          values={heatmapData.filter(item => isInDateRange(item.date))}
+          values={heatmapData.filter(item => isInDateRange(item.date, dateRangeStart, dateRangeEnd))}
           classForValue={(entry) => getGutterStyle(entry)}
           onClick={(item) => onDateClick(item?.date)}
           tooltipDataAttrs={(item) => ({
@@ -81,7 +81,18 @@ export default function CampaignHeatmap({
           showMonthLabels
         />
       </div>
-      <Tooltip />
-      </div>
+
+      <Tooltip 
+        id="data-tooltip"
+        place="top"
+        style={{ 
+          backgroundColor: '#333', 
+          color: '#fff', 
+          padding: '8px 12px',
+          borderRadius: '4px',
+          fontSize: '14px'
+        }}
+      />
+    </div>
   );
 }

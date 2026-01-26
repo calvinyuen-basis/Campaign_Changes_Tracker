@@ -5,38 +5,61 @@ import { getCampaignChanges } from "./api";
 import DisplayContainer from './Components/DisplayContainer';
 import CampaignHeatmap from './Components/CampaignHeatmap/CampaignHeatmap';
 import DateRangePicker from './Components/DateRangePicker';
-import { TextField, Button, Box } from '@mui/material';
+import { TextField, Button, Box, Alert } from '@mui/material';
+import { formatDateString } from './utils/dateUtils';
 import './App.css';
-
-function getChangesByDate(data) {
-  if (data.length === 0) return [];
-  
-  const counts = {};
-  data.forEach(entry => {
-    const date = new Date(entry.committed).toISOString().split("T")[0];
-    if (entry.type === 'INITIAL') {
-      counts[date] = 0
-    } else {
-      counts[date] = (counts[date] || 0) + 1;
-    }
-  });
-  return Object.entries(counts).map(([date, count]) => ({ date, count }));
-}
 
 export default function App() {
   const [data, setData] = useState([]);
   const [heatmapData, setHeatmapData] = useState([]);
-  const [firstDate, setFirstDate] = useState(null);
-  const [lastDate, setLastDate] = useState(new Date());
-
-  const [campaignCreationDate, setCampaignCreationDate] = useState(null);
-
-  const [error, setError] = useState(null);
   const [changesOnSelectedDate, setChangesOnSelectedDate] = useState([]);
-  const [campaignId, setCampaignId] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [firstDate, setFirstDate] = useState(null);
+  const [lastDate, setLastDate] = useState(null);
+  const [campaignCreationDate, setCampaignCreationDate] = useState(null);
   const [dateRangeStart, setDateRangeStart] = useState(null);
   const [dateRangeEnd, setDateRangeEnd] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  function getChangesByDate(data) {
+    if (data.length === 0) return [];
+    
+    const counts = {};
+    data.forEach(entry => {
+      const date = formatDateString(entry.committed);
+      if (entry.type === 'INITIAL') {
+        counts[date] = 0
+      } else {
+        counts[date] = (counts[date] || 0) + 1;
+      }
+    });
+
+    // Get first and last dates
+    const firstDate = new Date(data[data.length - 1].committed);
+    const lastDate = new Date(data[0].committed);
+    const today = new Date();
+    const endDate = lastDate < today ? lastDate : today;
+
+    // Fill in all dates between firstDate and endDate
+    const result = [];
+    const currentDate = new Date(firstDate);
+    
+    while (currentDate <= endDate) {
+      const dateStr = formatDateString(currentDate);
+      result.push({ date: dateStr, count: counts[dateStr] || 0 });
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // Ensure last date is included
+    const lastDateStr = formatDateString(endDate);
+    if (result.length === 0 || result[result.length - 1].date !== lastDateStr) {
+      result.push({ date: lastDateStr, count: counts[lastDateStr] || 0 });
+    }
+    
+    console.log(result)
+    return result;
+  }
 
   function getChangesOnSelectedDate(selectedDate) {
     if (!selectedDate) {
@@ -44,7 +67,7 @@ export default function App() {
     }
     return data.filter(entry => {
       if (entry) {
-        const entryDate = new Date(entry.committed).toISOString().split("T")[0];
+        const entryDate = formatDateString(entry.committed);
         return entryDate === selectedDate;
       }
     });
@@ -52,30 +75,32 @@ export default function App() {
 
   async function handleLoadCampaign(e) {
     e.preventDefault();
-    console.log('Campaign ID from state:', campaignId);
+    const formData = new FormData(e.target);
+    const campaignID = formData.get('campaignId');
 
-    if (!campaignId || isNaN(campaignId)) {
+    // validate the input value
+    if (!campaignID || isNaN(campaignID)) {
       setError('Please enter a valid campaign ID');
       return;
     }
-
     setLoading(true);
     setError(null);
     setChangesOnSelectedDate([]);
 
     try {
-      const result = await getCampaignChanges(Number(campaignId));
+      const result = await getCampaignChanges(Number(campaignID));
+      // An existing campaign must have at least one entry in result
+      if (result.length === 0) {
+        return setError('This campaign does not exist. Please enter a valid campaign ID.');
+      }
+      setData(result);
+      setHeatmapData(getChangesByDate(result));
+
       const campaignCreationDate = new Date(result[result.length - 1].committed);
       const dateWithLastChange = new Date(result[0].committed);
       const today = new Date();
-      console.log(result)
-      
-      setData(result);
-      setHeatmapData(getChangesByDate(result));
-      console.log(getChangesByDate(result));
-
       // Preserve the date of campiagn's creation as an indication for CalendarHeatmap
-      setCampaignCreationDate(campaignCreationDate);
+      setCampaignCreationDate(formatDateString(campaignCreationDate));
       // Get the first and last date of all campaign's changes to limit date pickers
       setFirstDate(campaignCreationDate);
       setLastDate(dateWithLastChange < today ? dateWithLastChange : today);
@@ -98,7 +123,7 @@ export default function App() {
             <TextField
               label="Campaign ID"
               variant="outlined"
-              onChange={(e) => setCampaignId(e.target.value)}
+              name="campaignId"
               size="small"
               type="number"
               sx={{
@@ -126,18 +151,21 @@ export default function App() {
             />
           )}
         </Box>
-      
-      <CampaignHeatmap
-        heatmapData={heatmapData}
-        dateRangeStart={dateRangeStart}
-        dateRangeEnd={dateRangeEnd}
-        campaignCreationDate={campaignCreationDate}
-        onDateClick={(date) => setChangesOnSelectedDate(getChangesOnSelectedDate(date))}
-      />
-
-      {changesOnSelectedDate.length > 0 && (
-        <DisplayContainer changes={changesOnSelectedDate}/>
-      )}
+        {error && (
+          <Alert severity="error" sx={{ my: 2 }}>
+            {error}
+          </Alert>
+        )}
+        <CampaignHeatmap
+          heatmapData={heatmapData}
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
+          campaignCreationDate={campaignCreationDate}
+          onDateClick={(date) => setChangesOnSelectedDate(getChangesOnSelectedDate(date))}
+        />
+        {changesOnSelectedDate.length > 0 && (
+          <DisplayContainer changes={changesOnSelectedDate}/>
+        )}
       </div>
   );
 }
