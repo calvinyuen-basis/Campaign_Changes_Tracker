@@ -22,91 +22,63 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  function getChangesByDate(data) {
-    if (data.length === 0) return [];
-    
+  function getChangesByDate(data, firstDate, endDate) {
+    if (!data.length) return [];
+    // Count changes by date
     const counts = {};
     data.forEach(entry => {
-      const date = formatDateString(entry.committed);
-      if (entry.type === 'INITIAL') {
-        counts[date] = 0
-      } else {
+      if (entry.type === 'UPDATE') {
+        const date = formatDateString(entry.committed);
         counts[date] = (counts[date] || 0) + 1;
       }
     });
-
-    // Get first and last dates
-    const firstDate = new Date(data[data.length - 1].committed);
-    const lastDate = new Date(data[0].committed);
-    const today = new Date();
-    const endDate = lastDate < today ? lastDate : today;
-
-    // Fill in all dates between firstDate and endDate
+    // Fill all dates in range
     const result = [];
-    const currentDate = new Date(firstDate);
-    
-    while (currentDate <= endDate) {
-      const dateStr = formatDateString(currentDate);
+    const curr_date = new Date(firstDate);
+    const endDateStr = formatDateString(endDate);
+    while (true) {
+      const dateStr = formatDateString(curr_date);
       result.push({ date: dateStr, count: counts[dateStr] || 0 });
-      currentDate.setDate(currentDate.getDate() + 1);
+      if (dateStr === endDateStr) break;
+      curr_date.setDate(curr_date.getDate() + 1);
     }
-    
-    // Ensure last date is included
-    const lastDateStr = formatDateString(endDate);
-    if (result.length === 0 || result[result.length - 1].date !== lastDateStr) {
-      result.push({ date: lastDateStr, count: counts[lastDateStr] || 0 });
-    }
-    
-    console.log(result)
     return result;
   }
 
   function getChangesOnSelectedDate(selectedDate) {
-    if (!selectedDate) {
-      return [];
-    }
-    return data.filter(entry => {
-      if (entry) {
-        const entryDate = formatDateString(entry.committed);
-        return entryDate === selectedDate;
-      }
-    });
+    if (!selectedDate) return [];
+    return data.filter(entry => formatDateString(entry.committed) === selectedDate);
   }
 
   async function handleLoadCampaign(e) {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const campaignID = formData.get('campaignId');
-
-    // validate the input value
+    const campaignID = new FormData(e.target).get('campaignId');
     if (!campaignID || isNaN(campaignID)) {
       setError('Please enter a valid campaign ID');
       return;
     }
+
     setLoading(true);
     setError(null);
     setChangesOnSelectedDate([]);
-
     try {
       const result = await getCampaignChanges(Number(campaignID));
-      // An existing campaign must have at least one entry in result
-      if (result.length === 0) {
-        return setError('This campaign does not exist. Please enter a valid campaign ID.');
+      if (!result.length) {
+        setError('This campaign does not exist. Please enter a valid campaign ID.');
+        return;
       }
-      setData(result);
-      setHeatmapData(getChangesByDate(result));
 
-      const campaignCreationDate = new Date(result[result.length - 1].committed);
-      const dateWithLastChange = new Date(result[0].committed);
-      const today = new Date();
-      // Preserve the date of campiagn's creation as an indication for CalendarHeatmap
-      setCampaignCreationDate(formatDateString(campaignCreationDate));
-      // Get the first and last date of all campaign's changes to limit date pickers
-      setFirstDate(campaignCreationDate);
-      setLastDate(dateWithLastChange < today ? dateWithLastChange : today);
-      // the min and max date for date pickers
-      setDateRangeStart(campaignCreationDate);
-      setDateRangeEnd(dateWithLastChange < today ? dateWithLastChange : today);
+      const creationDate = new Date(result[result.length - 1].committed);
+      const lastChangeDate = new Date(result[0].committed);
+      const endDate = lastChangeDate < new Date() ? lastChangeDate : new Date();
+
+      setData(result);
+      setHeatmapData(getChangesByDate(result, creationDate, endDate));
+      setCampaignCreationDate(formatDateString(creationDate));
+      setFirstDate(creationDate);
+      setLastDate(endDate);
+      setDateRangeStart(creationDate);
+      setDateRangeEnd(endDate);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -156,6 +128,7 @@ export default function App() {
             {error}
           </Alert>
         )}
+
         <CampaignHeatmap
           heatmapData={heatmapData}
           dateRangeStart={dateRangeStart}
@@ -163,8 +136,11 @@ export default function App() {
           campaignCreationDate={campaignCreationDate}
           onDateClick={(date) => setChangesOnSelectedDate(getChangesOnSelectedDate(date))}
         />
+
         {changesOnSelectedDate.length > 0 && (
-          <DisplayContainer changes={changesOnSelectedDate}/>
+          changesOnSelectedDate.map((entry, index) => (
+            <DisplayContainer key={entry.id || index} entry={entry}/>
+          ))
         )}
       </div>
   );

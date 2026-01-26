@@ -28,22 +28,15 @@ export default function CampaignHeatmap({
       .reduce((total, item) => total + item.count, 0);
   }
 
-  function getColorClass(entry) {
-    if (!entry || entry.count === 0) return 'color-empty';
-    if (entry.count < 2) return 'color-scale-1';
-    if (entry.count < 4) return 'color-scale-2';
-    if (entry.count < 6) return 'color-scale-3';
-    return 'color-scale-4';
-  }
-
   function getGutterStyle(entry) {
-    if (!entry || !isInDateRange(entry.date, dateRangeStart, dateRangeEnd)) {
-      return 'color-out-of-range';
-    }
-    
-    const colorClass = getColorClass(entry);
-    const isCreationDate = entry?.date === campaignCreationDate;
-    
+    if (!entry || !isInDateRange(entry.date, dateRangeStart, dateRangeEnd)) return 'hidden';
+    let colorClass;
+    if (entry.count === 0) colorClass = 'color-empty';
+    else if (entry.count < 2) colorClass = 'color-scale-1';
+    else if (entry.count < 4) colorClass = 'color-scale-2';
+    else if (entry.count < 6) colorClass = 'color-scale-3';
+    else colorClass = 'color-scale-4';
+    const isCreationDate = entry.date === campaignCreationDate;
     return isCreationDate ? `${colorClass} color-bordered` : colorClass;
   }
 
@@ -52,7 +45,7 @@ export default function CampaignHeatmap({
   }
 
   return (
-    <div className="border rounded-3 shadow-sm p-4">
+    <div className="border rounded-3 shadow-sm p-4 mb-3">
       <div>
         {getTotalChangesInRange()} changes between {formatDateString(dateRangeStart)} and {formatDateString(dateRangeEnd)}
       </div>
