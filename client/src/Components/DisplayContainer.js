@@ -22,7 +22,10 @@ export default function DisplayContainer({ entry }) {
       <Collapse in={isExpanded}>
         <div className="px-3 mt-2">
           {entry.changes.map((change, index) => (
-            <ChangeDisplay key={index} change={change} index={index} />
+            <>
+              {index > 0 && <hr className="my-2" />}
+              <ChangeDisplay key={index} change={change} index={index} />
+            </>
           ))}
         </div>
       </Collapse>

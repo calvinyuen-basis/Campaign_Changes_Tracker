@@ -37,25 +37,22 @@ function renderValue(value) {
 
 export default function ChangeItem({ change, index }) {
   return (
-    <div>
-      {index > 0 && <hr className="my-2" />}
-      <div className="mb-3">
-        <div className="p-2 d-flex align-items-center">
-          <strong>{change.fieldName}</strong>
-        </div>
-        <Collapse in={true}>
-          <div className="d-flex gap-3 mt-2 p-2">
-            <div className="flex-fill">
-              <strong> Old: </strong>
-              {renderValue(change.oldValue)}
-            </div>
-            <div className="flex-fill">
-              <strong> New: </strong>
-              {renderValue(change.newValue)}
-            </div>
-          </div>
-        </Collapse>
+    <div className="mb-3" style={{ overflow: 'auto'}}>
+      <div className="p-2 d-flex align-items-center">
+        <strong>{change.fieldName}</strong>
       </div>
+      <Collapse in={true}>
+        <div className="d-flex gap-3 mt-2 p-2">
+          <div className="flex-fill">
+            <strong> Old: </strong>
+            {renderValue(change.oldValue)}
+          </div>
+          <div className="flex-fill">
+            <strong> New: </strong>
+            {renderValue(change.newValue)}
+          </div>
+        </div>
+      </Collapse>
     </div>
   );
 }

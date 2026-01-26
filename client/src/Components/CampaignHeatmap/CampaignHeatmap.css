@@ -19,7 +19,7 @@
 .react-calendar-heatmap .color-bordered { stroke: #ffd700; stroke-width: 1px; }
 .react-calendar-heatmap .hidden { display: none; }
 
-.weekday-labels-sticky {
+/* .weekday-labels-sticky {
   position: absolute;
   display: flex;
   flex-direction: column;
@@ -36,4 +36,4 @@
 
 .weekday-labels-sticky div {
   font-size: 20px;
-}
+} */
