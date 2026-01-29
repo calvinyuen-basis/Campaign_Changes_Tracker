@@ -10,10 +10,10 @@ export default function Navbar() {
         <Button 
           color="inherit" 
           component={Link} 
-          to="/CampaignChangesTracker"
+          to="/"
           sx={{ 
-            fontWeight: location.pathname === '/CampaignChangesTracker' ? 'bold' : 'normal',
-            textDecoration: location.pathname === '/CampaignChangesTracker' ? 'underline' : 'none'
+            fontWeight: location.pathname === '/' ? 'bold' : 'normal',
+            textDecoration: location.pathname === '/' ? 'underline' : 'none'
           }}
         >
           Campaign Changes Tracker

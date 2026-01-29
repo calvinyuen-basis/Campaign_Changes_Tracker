@@ -13,11 +13,11 @@ export async function getCampaignChanges(campaignId) {
           change.fieldName !== 'lastModified' && change.oldValue !== change.newValue
         ) : []
       }))
-      .filter(entry => entry.changes && entry.changes.length > 0);
+      .filter(entry => entry.type === 'INITIAL' || (entry.changes && entry.changes.length > 0));
     return filteredData;
 
   } catch (err) {
     console.error("Error fetching campaign:", err);
-    throw err; 
+    throw err;
   }
 }

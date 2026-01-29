@@ -87,8 +87,8 @@ export default function CampaignChangesTracker() {
   }
 
   return (
-    <div className="p-4 mx-auto">
-      <h2>Campaign Changes Tracker</h2>
+    <div className="p-5">
+      <h2 className="mb-4">Campaign Changes Tracker</h2>
 
       <Box className="d-flex gap-2 my-3 align-items-center py-2">
         <Box component="form" onSubmit={handleLoadCampaign} sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>

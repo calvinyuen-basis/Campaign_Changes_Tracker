@@ -1,7 +1,7 @@
 export default function CampaignTroubleshooter() {
   return (
-    <div className="p-4 mx-auto">
-      <h2>Campaign Troubleshooter</h2>
+    <div className="p-5">
+      <h2>Coming Soon...</h2>
     </div>
   );
 }

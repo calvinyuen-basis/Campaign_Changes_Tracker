@@ -10,8 +10,8 @@ export default function App() {
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/CampaignChangesTracker" element={<CampaignChangesTracker />} />
+        {/* <Route path="/" element={<Home />} /> */}
+        <Route path="/" element={<CampaignChangesTracker />} />
         <Route path="/CampaignTroubleshooter" element={<CampaignTroubleshooter />} />
       </Routes>
     </Router>
