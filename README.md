@@ -1,14 +1,17 @@
 # Campaign Changes Tracker
 
-## Overview
-
 The Campaign Changes Tracker is an interactive web interface that helps users track and visualize changes made to advertising campaigns within a specific timeline. The application provides a comprehensive view of all modifications, including a calendar heatmap visualization that displays the frequency of changes over time, allowing users to easily identify when and what changes were made to their campaigns.
 
 ## Features
 
+
 - Track all changes made to a campaign
 - Visualize change frequency with a calendar heatmap
 - Filter and review changes by date range
+
+## How It Works
+
+The application takes a campaign ID and uses an EVPump API endpoint to extract all changes and states of the campaign. It then parses this data and displays it on the interface for easy readability.
 
 ## Getting Started
 
