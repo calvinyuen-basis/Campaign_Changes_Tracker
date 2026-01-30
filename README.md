@@ -62,3 +62,7 @@ npm start
 ```
 The client will start on `http://localhost:3000` and automatically open in your browser.
 
+---
+
+This tool is intended for troubleshooting and debugging campaign delivery issues, making it easier to pinpoint changes that may have affected performance.
+
