@@ -2,7 +2,7 @@ import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import './CampaignHeatmap.css';
 import { Tooltip } from 'react-tooltip';
-import { formatDateString, isInDateRange } from '../../utils/dateUtils';
+import { formatDateString, isInDateRange } from '../../utils/dateTimeUtils';
 
 export default function CampaignHeatmap({ 
   heatmapData, 

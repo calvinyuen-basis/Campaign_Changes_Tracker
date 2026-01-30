@@ -4,7 +4,7 @@ import DisplayContainer from '../Components/DisplayContainer';
 import CampaignHeatmap from '../Components/CampaignHeatmap/CampaignHeatmap';
 import DateRangePicker from '../Components/DateRangePicker';
 import { TextField, Button, Box, Alert } from '@mui/material';
-import { formatDateString } from '../utils/dateUtils';
+import { formatDateString } from '../utils/dateTimeUtils';
 
 export default function CampaignChangesTracker() {
   const [data, setData] = useState([]);
@@ -52,6 +52,7 @@ export default function CampaignChangesTracker() {
 
   async function handleLoadCampaign(e) {
     e.preventDefault();
+    setHeatmapData([]);
     const campaignID = new FormData(e.target).get('campaignId');
     if (!campaignID || isNaN(campaignID)) {
       setError('Please enter a valid campaign ID');
@@ -60,7 +61,6 @@ export default function CampaignChangesTracker() {
 
     setLoading(true);
     setError(null);
-    setChangesOnSelectedDate([]);
     try {
       const result = await getCampaignChanges(Number(campaignID));
       if (!result.length) {
@@ -87,7 +87,7 @@ export default function CampaignChangesTracker() {
   }
 
   return (
-    <div className="p-5">
+    <div className="px-5 py-4">
       <h2 className="mb-4">Campaign Changes Tracker</h2>
 
       <Box className="d-flex gap-2 my-3 align-items-center py-2">

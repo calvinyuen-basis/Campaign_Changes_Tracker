@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './Components/Navbar';
-import Home from './Pages/Home';
+// import Home from './Pages/Home';
 import CampaignChangesTracker from './Pages/CampaignChangesTracker';
 import CampaignTroubleshooter from './Pages/CampaignTroubleshooter';
 import './App.css';

@@ -32,7 +32,7 @@ function renderValue(value) {
     return <div className="p-2">{String(parsed)}</div>;
   }
   
-  return <JsonView value={parsed} collapsed={1} style={{ padding: '5px', borderRadius: '3px', fontSize: '12px' }} />;
+  return <JsonView value={parsed} collapsed={1} style={{ padding: '5px', borderRadius: '3px', fontSize: '12px' }}/>;
 }
 
 export default function ChangeItem({ change, index }) {
