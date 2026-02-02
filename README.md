@@ -44,7 +44,7 @@ npm install
 
 ### Running the Application
 
-**Requirement:** You must have your VPN turned on for the API endpoint to work.
+**Requirement:** You must have your VPN turned on to be authenticated for the API endpoints to work.
 
 The application requires both the client and server to be running simultaneously.
 
