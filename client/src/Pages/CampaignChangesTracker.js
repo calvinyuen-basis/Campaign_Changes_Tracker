@@ -52,7 +52,10 @@ export default function CampaignChangesTracker() {
 
   async function handleLoadCampaign(e) {
     e.preventDefault();
+    // reset states
     setHeatmapData([]);
+    setChangesOnSelectedDate([]);
+    // validate campaign ID
     const campaignID = new FormData(e.target).get('campaignId');
     if (!campaignID || isNaN(campaignID)) {
       setError('Please enter a valid campaign ID');
@@ -87,7 +90,7 @@ export default function CampaignChangesTracker() {
   }
 
   return (
-    <div className="px-5 py-4">
+    <Box sx={{ maxWidth: 1500, px: 6, py: 3 }}>
       <h2 className="mb-4">Campaign Changes Tracker</h2>
 
       <Box className="d-flex gap-2 my-3 align-items-center py-2">
@@ -142,6 +145,6 @@ export default function CampaignChangesTracker() {
           <DisplayContainer key={entry.id || index} entry={entry}/>
         ))
       )}
-    </div>
+    </Box>
   );
 }

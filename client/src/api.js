@@ -21,3 +21,20 @@ export async function getCampaignChanges(campaignId) {
     throw err;
   }
 }
+
+
+export async function getCampaignDetails(campaignId) {
+  try {
+    const res = await fetch(`http://localhost:5000/api/sql/campaign/${campaignId}`);
+    if (!res.ok) {
+      throw new Error(`API request failed with status ${res.status}`);
+    }
+    const data = await res.json();
+    console.log(data);
+    return data;
+
+  } catch (err) {
+    console.error("Error fetching campaign:", err);
+    throw err;
+  }
+}
