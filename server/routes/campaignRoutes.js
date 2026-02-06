@@ -1,7 +1,8 @@
 import express from "express";
-import { getCampaignById } from "../controllers/campaignController.js";
+import { getCampaignDetails, getCampaignChanges } from "../controllers/campaignController.js";
 const router = express.Router();
 
-router.get("/:campaignID", getCampaignById);
+router.get("/:campaignID", getCampaignDetails);
+router.get("/external/:campaignID", getCampaignChanges);
 
 export default router;

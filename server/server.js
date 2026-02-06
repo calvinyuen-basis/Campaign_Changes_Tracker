@@ -15,43 +15,8 @@ app.use(cors());
 app.use(express.json());
 app.use(logger);
 
+app.use("/api/sql/campaign", campaignRoutes);
 app.use("/api/campaign", campaignRoutes);
-
-// Example: SQL query endpoint
-app.get("/api/sql/campaign/:campaignID", async (req, res) => {
-  try {
-    let { campaignID } = req.params;
-    campaignID = parseInt(campaignID, 10);
-    const pool = await getRentDB1Connection();
-    const [rows] = await pool.query(
-      "SELECT * FROM Campaign WHERE campaignId = ?",
-      [campaignID]
-    );
-    if (rows && rows.length > 0) {
-      res.json({ success: true, data: rows });
-    } else {
-      res.json({ success: false, data: [], message: "No campaign found for the given ID." });
-    }
-  } catch (err) {
-    console.error("SQL error:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Existing API endpoint (external fetch)
-app.get("/api/campaign/:campaignID", async (req, res) => {
-  try {
-    const { campaignID } = req.params;
-    const response = await fetch(
-      `https://evpapi-int.sitescout.com/entities/completeCampaign/${campaignID}/snapshots`
-    );
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-});
 
 
 // Verify DB connections on startup
@@ -70,4 +35,4 @@ app.get("/api/campaign/:campaignID", async (req, res) => {
   // }
 })();
 
-app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on ${PORT}\n`));

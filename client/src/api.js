@@ -1,3 +1,16 @@
+export async function getCampaignDetails(campaignId) {
+  try {
+    const res = await fetch(`http://localhost:5000/api/sql/campaign/${campaignId}`);
+    if (!res.ok) {
+      throw new Error(`API request failed with status ${res.status}`);
+    }
+    const result = await res.json();
+    return result;
+  } catch (err) {
+    console.error("Error fetching campaign:", err);
+    throw err;
+  }
+}
 
 export async function getCampaignChanges(campaignId) {
   try {
@@ -15,23 +28,6 @@ export async function getCampaignChanges(campaignId) {
       }))
       .filter(entry => entry.type === 'INITIAL' || (entry.changes && entry.changes.length > 0));
     return filteredData;
-
-  } catch (err) {
-    console.error("Error fetching campaign:", err);
-    throw err;
-  }
-}
-
-
-export async function getCampaignDetails(campaignId) {
-  try {
-    const res = await fetch(`http://localhost:5000/api/sql/campaign/${campaignId}`);
-    if (!res.ok) {
-      throw new Error(`API request failed with status ${res.status}`);
-    }
-    const data = await res.json();
-    console.log(data);
-    return data;
 
   } catch (err) {
     console.error("Error fetching campaign:", err);

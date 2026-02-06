@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { getCampaignChanges } from "../api";
-import DisplayContainer from '../Components/DisplayContainer';
-import CampaignHeatmap from '../Components/CampaignHeatmap/CampaignHeatmap';
-import DateRangePicker from '../Components/DateRangePicker';
-import { TextField, Button, Box, Alert } from '@mui/material';
+import DisplayContainer from '../components/DisplayContainer';
+import CampaignHeatmap from '../components/CampaignHeatmap/CampaignHeatmap';
+import DateRangePicker from '../components/DateRangePicker';
+import { Box, Alert } from '@mui/material';
+import CampaignInput from '../components/CampaignInput';
 import { formatDateString } from '../utils/dateTimeUtils';
 
 export default function CampaignChangesTracker() {
@@ -94,27 +95,10 @@ export default function CampaignChangesTracker() {
       <h2 className="mb-4">Campaign Changes Tracker</h2>
 
       <Box className="d-flex gap-2 my-3 align-items-center py-2">
-        <Box component="form" onSubmit={handleLoadCampaign} sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <TextField
-            label="Campaign ID"
-            variant="outlined"
-            name="campaignId"
-            size="small"
-            type="number"
-            sx={{
-              '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
-                WebkitAppearance: 'none',
-                margin: 0,
-              },
-              '& input[type=number]': {
-                MozAppearance: 'textfield',
-              },
-            }}
-          />
-          <Button variant="contained" type="submit" disabled={loading} sx={{ mr: 5 }}>
-            {loading ? 'Loading...' : 'Load Campaign'}
-          </Button>
-        </Box>
+        <CampaignInput
+          onSubmit={handleLoadCampaign}
+          loading={loading}
+        />
         {data.length > 0 && (
           <DateRangePicker
             dateRangeStart={dateRangeStart}
