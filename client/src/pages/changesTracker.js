@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { getCampaignChanges } from "../api";
-import DisplayContainer from '../components/DisplayContainer';
+
 import CampaignHeatmap from '../components/CampaignHeatmap/CampaignHeatmap';
-import DateRangePicker from '../components/DateRangePicker';
+import CampaignInput from '../components/campaignInput';
+import DisplayContainer from '../components/displayContainer';
+import DateRangePicker from '../components/dateRangePicker';
 import { Box, Alert } from '@mui/material';
-import CampaignInput from '../components/CampaignInput';
+
+import { getCampaignChanges } from "../api";
 import { formatDateString } from '../utils/dateTimeUtils';
 
 export default function CampaignChangesTracker() {
@@ -16,13 +18,10 @@ export default function CampaignChangesTracker() {
   const [campaignCreationDate, setCampaignCreationDate] = useState(null);
   const [dateRangeStart, setDateRangeStart] = useState(null);
   const [dateRangeEnd, setDateRangeEnd] = useState(null);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  function getChangesByDate(data, firstDate, endDate) {
-    if (!data.length) return [];
     
+  function getChangesByDate(data, firstDate, endDate) {
     const counts = {};
     data.forEach(entry => {
       if (entry.type === 'UPDATE') {
@@ -34,7 +33,6 @@ export default function CampaignChangesTracker() {
     const result = [];
     const currentDate = new Date(firstDate);
     const endDateStr = formatDateString(endDate);
-    
     let dateStr = formatDateString(currentDate);
     while (dateStr !== endDateStr) {
       result.push({ date: dateStr, count: counts[dateStr] || 0 });
@@ -42,7 +40,6 @@ export default function CampaignChangesTracker() {
       dateStr = formatDateString(currentDate);
     }
     result.push({ date: endDateStr, count: counts[endDateStr] || 0 });
-    
     return result;
   }
 

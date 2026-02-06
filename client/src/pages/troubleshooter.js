@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Box, Alert } from '@mui/material';
-import CampaignInput from '../components/CampaignInput';
+import CampaignInput from '../components/campaignInput';
+import CampaignDisplay from "../components/campaignDisplay";
+
 import { getCampaignDetails } from "../api"; 
-import CampaignDisplay from "../components/CampaignDisplay";
 
 export default function CampaignTroubleshooter() {
   const [loading, setLoading] = useState(false);

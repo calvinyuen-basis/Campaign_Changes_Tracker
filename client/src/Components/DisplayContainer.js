@@ -1,9 +1,10 @@
-import { Collapse } from '@mui/material';
 import { useState } from 'react';
+import { Collapse } from '@mui/material';
 import { FaChevronDown, FaChevronLeft } from 'react-icons/fa';
-import ChangeDisplay from './ChangeDisplay';
-import { parseTimeStamp } from '../utils/dateTimeUtils';
 import JsonView from '@uiw/react-json-view';
+
+import ChangeItem from './changeItem';
+import { parseTimeStamp } from '../utils/dateTimeUtils';
 
 export default function DisplayContainer({ entry }) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -32,7 +33,7 @@ export default function DisplayContainer({ entry }) {
             {entry.changes.map((change, index) => (
               <>
                 {index > 0 && <hr className="my-2" />}
-                <ChangeDisplay key={index} change={change} index={index} />
+                <ChangeItem key={index} change={change} index={index} />
               </>
             ))}
           </div>
