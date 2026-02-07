@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Box, Alert } from '@mui/material';
 import CampaignInput from '../components/campaignInput';
 import CampaignDisplay from "../components/campaignDisplay";
+import QueryEditor from "../components/queryEditor";
 
-import { getCampaignDetails } from "../api"; 
+import { retrieveCampaignDetails } from "../api"; 
 
 export default function CampaignTroubleshooter() {
   const [loading, setLoading] = useState(false);
@@ -14,12 +15,12 @@ export default function CampaignTroubleshooter() {
     e.preventDefault();
     setError("");
     
-    const campaignID = new FormData(e.target).get('campaignId'); // This line will be handled by CampaignIdForm
-    if (!campaignID || isNaN(campaignID)) {
-      return setError("Please enter a valid campaign ID");
+    const campaignId = new FormData(e.target).get('campaignId'); // This line will be handled by CampaignIdForm
+    if (!campaignId || isNaN(campaignId)) {
+      return setError("Please enter a valid campaign Id");
     }
 
-    const result = await getCampaignDetails(campaignID);
+    const result = await retrieveCampaignDetails(campaignId);
     if (!result.data) {
       return setError(result.message);
     }
@@ -40,6 +41,7 @@ export default function CampaignTroubleshooter() {
       {error && <Alert severity="error">{error}</Alert>}
 
       <CampaignDisplay campaignDetails={campaignDetails} />
+      <QueryEditor campaignDetails={campaignDetails} />
     </Box>
   );
 }

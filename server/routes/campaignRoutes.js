@@ -1,8 +1,10 @@
 import express from "express";
-import { getCampaignDetails, getCampaignChanges } from "../controllers/campaignController.js";
+import { getCampaignDetails, getCampaignChanges, getCampaignDealTargeting, getCampaignDomainTargeting } from "../controllers/campaignController.js";
 const router = express.Router();
 
-router.get("/:campaignID", getCampaignDetails);
-router.get("/external/:campaignID", getCampaignChanges);
+router.get("/:campaignId", getCampaignDetails);
+router.get("/:campaignId/changes", getCampaignChanges);
+router.get("/:campaignId/deals", getCampaignDealTargeting);
+router.get("/:campaignId/domainLists", getCampaignDomainTargeting);
 
 export default router;

@@ -2,23 +2,23 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Database configurations using environment variables
 export const rentdb1Config = {
-  host: process.env.DB_SERVER,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306
+  user: process.env.RENTDB_USERNAME,
+  password: process.env.RENTDB_PASSWORD,
+  host: process.env.RENTDB1_HOST,
+  database: process.env.RENTDB1_DATABASE_NAME,
+  port: process.env.RENTDB_PORT || 8000
   
 };
 
-// Ocient config (MySQL wire protocol)
-export const OcientConfig = {
-  host: process.env.OCIENT_HOST,
-  user: process.env.OCIENT_USER,
+export const ocientConfig = {
+  user:process.env.OCIENT_USERNAME,
   password: process.env.OCIENT_PASSWORD,
-  database: process.env.OCIENT_DB,
-  port: process.env.OCIENT_PORT || 8000,
+  host: process.env.OCIENT_HOST,
+  database: process.env.OCIENT_DATABASE_NAME,
+  port: process.env.OCIENT_PORT || 4252,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 };
-
 

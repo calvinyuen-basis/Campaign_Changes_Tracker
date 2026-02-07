@@ -1,6 +1,6 @@
-export async function getCampaignDetails(campaignId) {
+export async function retrieveCampaignDetails(campaignId) {
   try {
-    const res = await fetch(`http://localhost:5000/api/sql/campaign/${campaignId}`);
+    const res = await fetch(`http://localhost:5000/api/campaigns/${campaignId}`);
     if (!res.ok) {
       throw new Error(`API request failed with status ${res.status}`);
     }
@@ -12,9 +12,9 @@ export async function getCampaignDetails(campaignId) {
   }
 }
 
-export async function getCampaignChanges(campaignId) {
+export async function retrieveCampaignChanges(campaignId) {
   try {
-    const res = await fetch(`http://localhost:5000/api/campaign/${campaignId}`);
+    const res = await fetch(`http://localhost:5000/api/campaigns/${campaignId}/changes`);
     if (!res.ok) {
       throw new Error(`API request failed with status ${res.status}`);
     }
@@ -33,4 +33,37 @@ export async function getCampaignChanges(campaignId) {
     console.error("Error fetching campaign:", err);
     throw err;
   }
+}
+
+export async function retrieveDealTargeting(campaignId) {
+  try {
+    const res = await fetch(`http://localhost:5000/api/campaigns/${campaignId}/deals`);
+    if (!res.ok) {
+      throw new Error(`API request failed with status ${res.status}`);
+    }
+    const result = await res.json();
+    return result.data;
+
+  } catch (err) {
+    console.error("Error fetching campaign:", err);
+    throw err;
+  }
+}
+
+export async function retrieveDomainTargeting(campaignId) {
+  try {
+    const res = await fetch(`http://localhost:5000/api/campaigns/${campaignId}/domainLists`);
+    if (!res.ok) {
+      throw new Error(`API request failed with status ${res.status}`);
+    }
+    const result = await res.json();
+    return result;
+
+  } catch (err) {
+    console.error("Error fetching campaign:", err);
+    throw err;
+  }
+}
+
+export async function retrieveCampaignGeoTargeting(campaignId) {
 }

@@ -6,8 +6,8 @@ import DisplayContainer from '../components/displayContainer';
 import DateRangePicker from '../components/dateRangePicker';
 import { Box, Alert } from '@mui/material';
 
-import { getCampaignChanges } from "../api";
-import { formatDateString } from '../utils/dateTimeUtils';
+import { retrieveCampaignChanges } from "../api";
+import { formatDateString } from '../utils/utils';
 
 export default function CampaignChangesTracker() {
   const [data, setData] = useState([]);
@@ -54,8 +54,8 @@ export default function CampaignChangesTracker() {
     setHeatmapData([]);
     setChangesOnSelectedDate([]);
     // validate campaign ID
-    const campaignID = new FormData(e.target).get('campaignId');
-    if (!campaignID || isNaN(campaignID)) {
+    const campaignId = new FormData(e.target).get('campaignId');
+    if (!campaignId || isNaN(campaignId)) {
       setError('Please enter a valid campaign ID');
       return;
     }
@@ -63,7 +63,7 @@ export default function CampaignChangesTracker() {
     setLoading(true);
     setError(null);
     try {
-      const result = await getCampaignChanges(Number(campaignID));
+      const result = await retrieveCampaignChanges(campaignId);
       if (!result.length) {
         setError('This campaign does not exist. Please enter a valid campaign ID.');
         return;
