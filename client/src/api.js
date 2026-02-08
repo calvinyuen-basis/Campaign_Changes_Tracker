@@ -1,69 +1,31 @@
-export async function retrieveCampaignDetails(campaignId) {
+export async function send(method='GET', url, body=null) {
   try {
-    const res = await fetch(`http://localhost:5000/api/campaigns/${campaignId}`);
-    if (!res.ok) {
-      throw new Error(`API request failed with status ${res.status}`);
+    const res = await fetch(`${process.env.REACT_APP_PUBLIC_BACKEND_URL}${url}`)
+    if (res.ok) {
+      return res.json();
     }
-    const result = await res.json();
-    return result;
   } catch (err) {
-    console.error("Error fetching campaign:", err);
+    console.error(err);
     throw err;
   }
 }
 
-export async function retrieveCampaignChanges(campaignId) {
-  try {
-    const res = await fetch(`http://localhost:5000/api/campaigns/${campaignId}/changes`);
-    if (!res.ok) {
-      throw new Error(`API request failed with status ${res.status}`);
-    }
-    const data = await res.json();
-    const filteredData = data
-      .map(entry => ({
-        ...entry,
-        changes: entry.changes ? entry.changes.filter(change => 
-          change.fieldName !== 'lastModified' && change.oldValue !== change.newValue
-        ) : []
-      }))
-      .filter(entry => entry.type === 'INITIAL' || (entry.changes && entry.changes.length > 0));
-    return filteredData;
-
-  } catch (err) {
-    console.error("Error fetching campaign:", err);
-    throw err;
-  }
+export function retrieveCampaignDetails(campaignId) {
+  return send("GET", `/api/campaigns/${campaignId}`);
 }
 
 export async function retrieveDealTargeting(campaignId) {
-  try {
-    const res = await fetch(`http://localhost:5000/api/campaigns/${campaignId}/deals`);
-    if (!res.ok) {
-      throw new Error(`API request failed with status ${res.status}`);
-    }
-    const result = await res.json();
-    return result.data;
-
-  } catch (err) {
-    console.error("Error fetching campaign:", err);
-    throw err;
-  }
+  return send("GET", `/api/campaigns/${campaignId}/deals`);
 }
 
 export async function retrieveDomainTargeting(campaignId) {
-  try {
-    const res = await fetch(`http://localhost:5000/api/campaigns/${campaignId}/domainLists`);
-    if (!res.ok) {
-      throw new Error(`API request failed with status ${res.status}`);
-    }
-    const result = await res.json();
-    return result;
-
-  } catch (err) {
-    console.error("Error fetching campaign:", err);
-    throw err;
-  }
+  return send("GET", `/api/campaigns/${campaignId}/domainLists`);
 }
 
-export async function retrieveCampaignGeoTargeting(campaignId) {
+export async function retrieveGeoTargeting(advertiserId, campaignId) {
+  return send("GET", `/api/campaigns/${campaignId}/geo/${advertiserId}`);
+}
+
+export async function retrieveCampaignChanges(campaignId) {
+  return send("GET", `/api/campaigns/${campaignId}/changes`);
 }

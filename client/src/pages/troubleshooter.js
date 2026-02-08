@@ -13,18 +13,21 @@ export default function CampaignTroubleshooter() {
 
   async function handleLoadCampaign(e) {
     e.preventDefault();
+    setCampaignDetails(null);
     setError("");
     
-    const campaignId = new FormData(e.target).get('campaignId'); // This line will be handled by CampaignIdForm
+    const campaignId = new FormData(e.target).get('campaignId');
     if (!campaignId || isNaN(campaignId)) {
       return setError("Please enter a valid campaign Id");
     }
 
-    const result = await retrieveCampaignDetails(campaignId);
-    if (!result.data) {
-      return setError(result.message);
+    const details = await retrieveCampaignDetails(campaignId);
+    if (details) {
+      setCampaignDetails(details);
+      console.log(details)
+    } else {
+      setError("Campaign not found. Please enter a valid campaign Id");
     }
-    setCampaignDetails(result.data[0]);
   }
   
 

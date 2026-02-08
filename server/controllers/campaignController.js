@@ -3,20 +3,19 @@ import axios from 'axios';
 
 import { rentdb1 } from "../database/db.js";
 
-
-// Database Queries
+// DATABASE QUERIES
 
 export async function getCampaignDetails(req, res) {
   try {
     const { campaignId } = req.params;
-    const [rows] = await rentdb1.query("SELECT * FROM Campaign WHERE campaignId = ? LIMIT 1", [campaignId]);
-    if (rows.length > 0) {
-      res.json({ success: true, data: rows });
-    } else {
-      res.json({ success: false, message: "Campaign is not found. Please enter a valid Campaign ID" });
+    const [campaignDetails] = await rentdb1.query("SELECT * FROM Campaign WHERE campaignId = ? LIMIT 1", [campaignId]);
+    
+    if (campaignDetails.length === 0) {
+      return res.status(404).end("Campaign not found");
     }
+    res.json(campaignDetails[0]); 
   } catch (err) {
-    console.log(err)
+    console.error(err);
     res.status(500).json(err);
   }
 }
@@ -25,13 +24,9 @@ export async function getCampaignDealTargeting(req, res) {
   try {
     const { campaignId } = req.params;
     let [result] = await rentdb1.query("SELECT dealjs FROM Campaign WHERE campaignId = ? LIMIT 1", [campaignId]);
-    if (!result.length || result[0].dealjs == null) {
-      res.json({ success: false, message: "This campaign does not have any deal targeting" });
-      return;
-    }
+
     const dealjs = JSON.parse(result[0].dealjs);
     const externalDealIds = [];
-    
     // retrieve individual external deal ids
     if (dealjs.hasOwnProperty('cd')) {
       dealjs.cd.forEach(deal => {
@@ -55,9 +50,28 @@ export async function getCampaignDealTargeting(req, res) {
       //     externalDealIds.push(deal);
       //   });
     }
-    return res.json({ success: true, data: externalDealIds });
+    res.json(externalDealIds);
   } catch (err) {
-    console.log(err)
+    res.status(500).json(err);
+  }
+}
+
+export async function getCampaignGeoTargeting(req, res) {
+  try {
+    const { advertiserId, campaignId } = req.params;
+    const accessToken = process.env.SITESCOUT_ACCESS_TOKEN; // or get from elsewhere
+    const response = await fetch(
+      `https://api.sitescout.com/advertisers/${advertiserId}/campaigns/${campaignId}/targeting/geo`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      }
+    );
+    const data = await response.json();
+    console.log(data)
+    
+  } catch (err) {
     res.status(500).json(err);
   }
 }
@@ -86,16 +100,13 @@ export async function getCampaignDomainTargeting(req, res) {
         blacklist.add(domain);
       }
     });
-    return res.json({
-      success: true,
-      whitelist: Array.from(whitelist),
-      blacklist: Array.from(blacklist)
-    });
+    res.json({ whitelist: Array.from(whitelist), blacklist: Array.from(blacklist) });
   } catch (err) {
-    console.error(err);
     res.status(500).json(err);
   }
 }
+
+// EXTERNAL API CALLS
 
 export async function getCampaignChanges(req, res) {
   try {
@@ -104,9 +115,18 @@ export async function getCampaignChanges(req, res) {
       `https://evpapi-int.sitescout.com/entities/completeCampaign/${campaignId}/snapshots`
     );
     const data = await response.json();
-    res.json(data);
+
+    // filter out campaign changes that aren't meaningful
+    const filteredData = data
+      .map(entry => ({
+        ...entry,
+        changes: entry.changes ? entry.changes.filter(change => 
+          change.fieldName !== 'lastModified' && change.oldValue !== change.newValue
+        ) : []
+      }))
+      .filter(entry => entry.type === 'INITIAL' || (entry.changes && entry.changes.length > 0));
+    res.json(filteredData);
   } catch (err) {
-    console.error(err);
     res.status(500).json(err);
   }
 }

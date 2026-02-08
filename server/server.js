@@ -5,7 +5,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import { rentdb1 } from "./database/db.js";
+import { getAccessToken } from "./authentication/accessToken.js";
+
 import campaignRoutes from "./routes/campaignRoutes.js";
+
 import logger from "./middleware/logger.js";
 
 dotenv.config();
@@ -18,7 +21,7 @@ app.use(logger);
 
 app.use("/api/campaigns", campaignRoutes);
 
-// Verify DB connections on startup
+// verify access token and database connections on startup
 (async () => {
   try {
     const connection = await rentdb1.getConnection();
@@ -28,12 +31,12 @@ app.use("/api/campaigns", campaignRoutes);
   } catch (err) {
     console.error("❌ Failed to connect to RentDB1 (MySQL):", err.message);
   }
-  // try {
-  //   const connection = await getOcientConnection();
-  //   console.log("✅ Connected to Ocient");
-  // } catch (err) {
-  //   console.error("❌ Failed to connect to Ocient:", err.message);
-  // }
+  try {
+    const token = await getAccessToken();
+    if (token !== null) console.log("✅ Genereated Access Token");
+  } catch (err) {
+    console.error("❌ Failed to connect to RentDB1 (MySQL):", err.message);
+  }
 }) ();
 
 app.listen(PORT, () => console.log(`Server running on ${PORT}\n`));

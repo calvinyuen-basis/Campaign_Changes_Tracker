@@ -3,12 +3,23 @@ import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-sql';
 import 'ace-builds/src-noconflict/theme-github';
 
-import { retrieveDealTargeting, retrieveDomainTargeting } from '../api';
+import { retrieveDealTargeting, retrieveDomainTargeting, retrieveGeoTargeting } from '../api';
 import { concatStringList, parseTargeting } from '../utils/utils';
 
 export default function QueryEditor(props) {
   const campaignDetails = props.campaignDetails || {};
-  const { campaignId, dealjs, audienceTargetingjs, contextualjs, deviceTargetingjs, trafficTypes, domainListIdsjs } = campaignDetails;
+  const { 
+    campaignId, 
+    advertiser_advertiserId,
+    dealjs, 
+    geojs, 
+    audienceTargetingjs, 
+    contextualjs, 
+    deviceTargetingjs, 
+    trafficTypes, 
+    domainListIdsjs 
+  } = campaignDetails;
+
   const [query, setQuery] = useState("");
   
   // query template
@@ -58,10 +69,13 @@ export default function QueryEditor(props) {
     // deal 
     if (dealjs) {
       const dealIds = await retrieveDealTargeting(campaignId);
-      if (dealIds && dealIds.length > 0) {
-        const dealTargeting = dealIds.map(id => `a.deals_dealid && array['${id}']`);
-        clauses.push(`(${dealTargeting.join(' OR\n')})`);
-      }
+      const dealTargeting = dealIds.map(id => `a.deals_dealid && array['${id}']`);
+      clauses.push(`(${dealTargeting.join(' OR\n')})`);
+    }
+    // geo
+    if (geojs) {
+      const res = await retrieveGeoTargeting(advertiser_advertiserId, campaignId);
+      console.log(res)
     }
     // domain
     if (domainListIdsjs) {
